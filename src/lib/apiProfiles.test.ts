@@ -607,6 +607,18 @@ describe('custom providers', () => {
     })
   })
 
+  it('keeps provider order usable when custom providers are added after manual sorting', () => {
+    const settings = normalizeSettings({
+      providerOrder: ['fal', 'openai'],
+      customProviders: [
+        { id: 'custom-alpha', name: '示例服务商 A', submit: { path: 'images/generations' } },
+        { id: 'custom-beta', name: '示例服务商 B', submit: { path: 'images/generations' } },
+      ],
+    })
+
+    expect(settings.providerOrder).toEqual(['fal', 'openai', 'custom-alpha', 'custom-beta'])
+  })
+
   it('keeps active custom providers in Images API mode when legacy apiMode is responses', () => {
     const settings = normalizeSettings({
       apiMode: 'responses',

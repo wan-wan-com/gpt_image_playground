@@ -94,6 +94,18 @@ function normalizeZipDownloadRoutes(value: unknown) {
   return value.filter((item): item is typeof ZIP_DOWNLOAD_ROUTE_VALUES[number] => typeof item === 'string' && allowed.has(item))
 }
 
+function normalizeProviderOrder(value: unknown, customProviders: CustomProviderDefinition[]): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+
+  const providerIds = ['openai', 'fal', ...customProviders.map((provider) => provider.id)]
+  const knownIds = new Set(providerIds)
+  const ordered = value
+    .map(String)
+    .filter((id, idx, list) => knownIds.has(id) && list.indexOf(id) === idx)
+
+  return [...ordered, ...providerIds.filter((id) => !ordered.includes(id))]
+}
+
 function normalizeAgentApiConfigMode(value: unknown): AgentApiConfigMode {
   return value === 'native' || value === 'hybrid' ? value : 'off'
 }
@@ -538,7 +550,7 @@ export function normalizeSettings(input: Partial<AppSettings> | unknown): AppSet
     streamImages: active.streamImages,
     streamPartialImages: active.streamPartialImages,
     customProviders,
-    providerOrder: Array.isArray(record.providerOrder) ? record.providerOrder.map(String) : undefined,
+    providerOrder: normalizeProviderOrder(record.providerOrder, customProviders),
     clearInputAfterSubmit: typeof record.clearInputAfterSubmit === 'boolean' ? record.clearInputAfterSubmit : false,
     persistInputOnRestart: typeof record.persistInputOnRestart === 'boolean' ? record.persistInputOnRestart : true,
     reuseTaskApiProfileTemporarily: typeof record.reuseTaskApiProfileTemporarily === 'boolean' ? record.reuseTaskApiProfileTemporarily : false,
